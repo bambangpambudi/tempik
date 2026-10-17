@@ -2,50 +2,122 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tempik</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%238185f8'/%3E%3Cstop offset='100%25' style='stop-color:%236366f1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Ctext x='32' y='46' font-family='Inter,sans-serif' font-size='36' font-weight='700' fill='white' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E" />
-    <link rel="stylesheet" href="/styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0B0F19" />
+    <title>Artex Mail</title>
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+    <link rel="stylesheet" href="/styles.css?v=5" />
   </head>
   <body>
-    <div class="app">
-      <header>
-        <h1 id="appTitle">Tempik</h1>
-        <p id="appSubtitle">Disposable inbox</p>
-      </header>
+    <div class="orb orb-cyan"></div>
+    <div class="orb orb-violet"></div>
+    <div class="bg-grid"></div>
 
-      <section class="toolbar">
-        <select id="inboxSelect"></select>
-        <button id="copyBtn">📋 Copy</button>
-        <button id="refreshBtn">🔄 Refresh</button>
-        <button id="newBtn">＋ New</button>
-        <button id="deleteBtn" class="danger">🗑 Delete</button>
-      </section>
+    <header class="topbar">
+      <button class="logo-btn" id="logoBtn" type="button" title="Open inbox manager">
+        <img src="/logo.png" alt="Artex Mail" class="logo" />
+        <span class="logo-text" id="appTitle">Artex Mail</span>
+      </button>
 
-      <section class="new-box hidden" id="newBox">
-        <input id="localPartInput" placeholder="username atau kosongkan untuk random" />
-        <select id="domainSelect"></select>
-        <button id="createCustomBtn">✦ Create</button>
-        <button id="createRandomBtn">🎲 Random</button>
-      </section>
+      <div class="current-inbox-info">
+        <div class="status-indicator"></div>
+        <h2 id="currentInbox">No inbox selected</h2>
+      </div>
 
-      <section class="panel">
-        <div class="panel-head">
-          <h2 id="currentInbox">No inbox selected</h2>
-          <span id="messageCount">0 messages</span>
+      <div class="topbar-actions">
+        <button id="copyBtn" class="icon-btn" title="Copy address" type="button">
+          <i class="fa-regular fa-copy"></i>
+        </button>
+        <button id="refreshBtn" class="icon-btn" title="Refresh inbox" type="button">
+          <i class="fa-solid fa-rotate-right"></i>
+        </button>
+      </div>
+    </header>
+
+    <main class="mail-view">
+      <div class="mail-list-panel">
+        <div class="panel-header">
+          <span>Messages</span>
+          <span id="messageCount" class="count-badge">0</span>
         </div>
         <div id="messageList" class="message-list"></div>
-      </section>
+      </div>
+      <div class="mail-detail-panel" id="messageDetail"></div>
+    </main>
 
-      <footer>
-        <a href="https://github.com/hirotomasato" target="_blank" rel="noopener">
-          Developer by <span>masantoid</span>
-        </a>
-      </footer>
+    <div class="drawer-backdrop" id="drawerBackdrop"></div>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h2>Inbox Manager</h2>
+        <button id="closeSidebarBtn" class="icon-btn" type="button" title="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="create-section">
+        <div class="section-label">
+          <i class="fa-solid fa-plus"></i>
+          <span>Create New Inbox</span>
+        </div>
+        <div class="input-wrap">
+          <i class="fa-regular fa-user input-icon"></i>
+          <input id="localPartInput" type="text" placeholder="username or empty for random" autocomplete="off" spellcheck="false" />
+        </div>
+        <select id="domainSelect"></select>
+        <div class="btn-row">
+          <button id="createRandomBtn" class="btn-ghost" type="button">
+            <i class="fa-solid fa-dice"></i> Random
+          </button>
+          <button id="createCustomBtn" class="btn-primary" type="button">
+            <i class="fa-solid fa-check"></i> Create
+          </button>
+        </div>
+      </div>
+
+      <div class="inbox-list-section">
+        <div class="section-label">
+          <i class="fa-solid fa-inbox"></i>
+          <span>Your Inboxes</span>
+          <span id="inboxCount" class="count-badge">0</span>
+        </div>
+        <div id="inboxList" class="inbox-list"></div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="creator">
+          <div class="creator-avatar"><i class="fa-solid fa-code"></i></div>
+          <div class="creator-info">
+            <span>Developed by</span>
+            <strong>Tsuneyuki</strong>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="modal-overlay hidden" id="deleteModal">
+      <div class="modal" style="max-width: 380px; text-align: center;">
+        <div class="modal-body" style="padding: 32px 24px 20px;">
+          <div class="danger-icon-wrap">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <h3 style="font-family: var(--font-display); font-size: 20px; margin-bottom: 8px;">Delete Inbox?</h3>
+          <p style="color: var(--text-sec); font-size: 14px; line-height: 1.5; margin-bottom: 24px;">
+            Are you sure you want to delete <strong id="deleteTargetAddress" style="color: var(--text-main); word-break: break-all;"></strong>? This action cannot be undone.
+          </p>
+        </div>
+        <div class="modal-footer" style="padding: 0 24px 24px; gap: 12px;">
+          <button id="cancelDeleteBtn" class="btn-ghost" type="button">Cancel</button>
+          <button id="confirmDeleteBtn" class="btn-danger" type="button">Delete</button>
+        </div>
+      </div>
     </div>
 
     <div class="toast-container" id="toastContainer"></div>
-
-    <script src="/app.js"></script>
+    <!-- ⭐️ CACHE BUSTER v=6 AGAR BROWSER AMBIL FILE TERBARU -->
+    <script src="/app.js?v=25"></script>
   </body>
 </html>

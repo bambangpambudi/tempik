@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#090d1a">
+  <meta name="description" content="Artex Mail — layanan email sementara yang praktis dan mudah digunakan.">
+  <title>Artex Mail</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-icon" aria-hidden="true">A</div>
+      <div>
+        <h1 id="appTitle">Artex Mail</h1>
+        <p id="appSubtitle">Email sementara, praktis dan mudah digunakan.</p>
+      </div>
+    </div>
+    <div class="service-status">
+      <span class="status-dot"></span>
+      Layanan email
+    </div>
+  </header>
+
+  <main>
+    <section id="homeSection" class="hero">
+      <div class="eyebrow">YOUR TEMPORARY INBOX</div>
+      <h2>Email sementara.<br><span class="gradient-text">Lebih simpel.</span></h2>
+      <p>Buat alamat email sementara, terima pesan, dan kelola inbox dalam satu tempat.</p>
+      <div class="hero-decoration" aria-hidden="true">✉</div>
+    </section>
+
+    <section id="inboxSection" class="section">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">YOUR ADDRESS</div>
+          <h2>Alamat email</h2>
+        </div>
+        <span class="section-symbol" aria-hidden="true">◎</span>
+      </div>
+
+      <label for="inboxSelect">Pilih alamat email</label>
+      <select id="inboxSelect" aria-label="Pilih alamat email">
+        <option value="">Memuat inbox...</option>
+      </select>
+
+      <div class="address-preview">
+        <div class="address-caption">ALAMAT AKTIF</div>
+        <div id="currentInbox" class="address-value">Belum ada alamat</div>
+      </div>
+
+      <div class="action-row">
+        <button id="copyBtn" type="button" class="secondary-button">
+          <span aria-hidden="true">▣</span> Salin
+        </button>
+        <button id="refreshBtn" type="button" class="secondary-button">
+          <span aria-hidden="true">↻</span> Refresh
+        </button>
+        <button id="deleteBtn" type="button" class="danger-button">
+          <span aria-hidden="true">×</span> Hapus
+        </button>
+      </div>
+    </section>
+
+    <section id="createSection" class="section create-section">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">GET STARTED</div>
+          <h2>Buat email baru</h2>
+        </div>
+        <span class="section-symbol" aria-hidden="true">＋</span>
+      </div>
+
+      <p class="section-description">Gunakan alamat acak atau tentukan nama alamatmu sendiri.</p>
+
+      <button id="newBtn" type="button" class="primary-button full-button">
+        <span aria-hidden="true">＋</span> Buat alamat email
+      </button>
+
+      <div id="newBox" class="create-form hidden">
+        <label for="localPartInput">Nama alamat (opsional)</label>
+        <input
+          id="localPartInput"
+          type="text"
+          placeholder="Contoh: namakamu"
+          autocomplete="off"
+          spellcheck="false"
+        >
+
+        <label for="domainSelect">Domain email</label>
+        <select id="domainSelect" aria-label="Pilih domain email">
+          <option value="">Memuat domain...</option>
+        </select>
+
+        <div class="form-actions">
+          <button id="createCustomBtn" type="button" class="primary-button">
+            Buat alamat ini
+          </button>
+          <button id="createRandomBtn" type="button" class="secondary-button">
+            Acak alamat
+          </button>
+        </div>
+        <p class="form-hint">Alamat akan dibuat setelah kamu memilih salah satu tombol di atas.</p>
+      </div>
+    </section>
+
+    <section id="messagesSection" class="section">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">INCOMING MAIL</div>
+          <h2>Pesan masuk</h2>
+        </div>
+        <span id="messageCount" class="count-badge">0 messages</span>
+      </div>
+
+      <div class="messages-address">
+        <span class="address-caption">INBOX YANG DIPANTAU</span>
+        <div id="messagesAddressPreview">Pilih alamat email terlebih dahulu</div>
+      </div>
+
+      <div id="messageList" class="message-list">
+        <div class="empty-state">
+          <div class="empty-icon" aria-hidden="true">✉</div>
+          <div class="title">Memuat pesan</div>
+          <div class="sub">Mohon tunggu sebentar.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="settingsSection" class="section settings-section">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">ABOUT THE SERVICE</div>
+          <h2>Tentang Artex Mail</h2>
+        </div>
+        <span class="section-symbol" aria-hidden="true">ⓘ</span>
+      </div>
+
+      <div class="info-card">
+        <div class="info-icon" aria-hidden="true">✦</div>
+        <div>
+          <strong>Praktis dan sederhana</strong>
+          <p>Kelola alamat email sementara langsung dari browser.</p>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-icon" aria-hidden="true">↻</div>
+        <div>
+          <strong>Inbox mudah diperiksa</strong>
+          <p>Periksa pesan masuk melalui daftar inbox yang tersedia.</p>
+        </div>
+      </div>
+
+      <div class="privacy-note">
+        <strong>Catatan privasi</strong>
+        <p>Email sementara tidak cocok untuk akun penting, pemulihan akun, atau informasi rahasia. Hindari menggunakannya untuk menerima data sensitif.</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+  <nav class="bottom-nav" aria-label="Navigasi utama">
+    <button type="button" class="nav-item" data-target="messagesSection">
+      <span class="nav-icon" aria-hidden="true">✉</span>
+      <span>Inbox</span>
+    </button>
+    <button type="button" class="nav-item" data-target="createSection">
+      <span class="nav-icon" aria-hidden="true">＋</span>
+      <span>Buat Email</span>
+    </button>
+    <button type="button" class="nav-item" data-target="inboxSection">
+      <span class="nav-icon" aria-hidden="true">◎</span>
+      <span>Alamat</span>
+    </button>
+    <button type="button" class="nav-item" data-target="settingsSection">
+      <span class="nav-icon" aria-hidden="true">ⓘ</span>
+      <span>Info</span>
+    </button>
+  </nav>
+
+  <footer>
+    <p>Artex Mail · Simple email, smoother workflow.</p>
+  </footer>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>

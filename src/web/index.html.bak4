@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tempik</title>
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <div class="bg-glow" aria-hidden="true"></div>
+
+    <div class="app">
+      <header class="hero">
+        <img src="/logo.png" alt="Tempik logo" class="logo" decoding="async" />
+        <div class="hero-content">
+          <span class="badge"><i class="fa-solid fa-bolt"></i> Ephemeral Email</span>
+          <h1 id="appTitle">Tempik</h1>
+          <p id="appSubtitle">Disposable inbox</p>
+        </div>
+      </header>
+
+      <section class="toolbar">
+        <div class="toolbar-select-wrap">
+          <i class="fa-solid fa-inbox toolbar-select-icon"></i>
+          <select id="inboxSelect" aria-label="Select inbox"></select>
+        </div>
+        <button id="copyBtn" title="Copy address">
+          <i class="fa-regular fa-copy"></i><span>Copy</span>
+        </button>
+        <button id="refreshBtn" title="Refresh messages">
+          <i class="fa-solid fa-rotate-right"></i><span>Refresh</span>
+        </button>
+        <button id="newBtn" class="primary" title="Create new inbox">
+          <i class="fa-solid fa-plus"></i><span>New</span>
+        </button>
+        <button id="deleteBtn" class="danger" title="Delete inbox">
+          <i class="fa-regular fa-trash-can"></i><span>Delete</span>
+        </button>
+      </section>
+
+      <section class="new-box hidden" id="newBox">
+        <div class="new-box-row">
+          <div class="input-wrap">
+            <i class="fa-regular fa-user input-icon"></i>
+            <input
+              id="localPartInput"
+              placeholder="username or leave empty for random"
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </div>
+          <select id="domainSelect" aria-label="Select domain"></select>
+        </div>
+        <div class="new-box-row">
+          <button id="createCustomBtn">
+            <i class="fa-solid fa-wand-magic-sparkles"></i><span>Create</span>
+          </button>
+          <button id="createRandomBtn">
+            <i class="fa-solid fa-shuffle"></i><span>Random</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div class="panel-title">
+            <i class="fa-solid fa-envelope-open-text"></i>
+            <h2 id="currentInbox">No inbox selected</h2>
+          </div>
+          <span id="messageCount">0 messages</span>
+        </div>
+        <div id="messageList" class="message-list"></div>
+      </section>
+
+      <footer>
+        <div class="footer-glow" aria-hidden="true"></div>
+
+        <div class="footer-inner">
+          <div class="footer-brand">
+            <div class="footer-mark">
+              <i class="fa-solid fa-cube"></i>
+            </div>
+            <div class="footer-brand-text">
+              <span class="footer-name">Artex Mail</span>
+              <span class="footer-by">by Tsuneyuki</span>
+            </div>
+          </div>
+
+          <div class="footer-chips">
+            <span class="footer-chip">
+              <i class="fa-brands fa-github"></i>
+              <span>GitHub</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="footer-divider" aria-hidden="true"></div>
+
+        <div class="footer-bottom">
+          <span>© <span id="footerYear">2025</span> Artex Mail</span>
+          <span class="footer-dot" aria-hidden="true"></span>
+          <span>
+            Crafted with <i class="fa-solid fa-heart footer-heart"></i> by
+            <strong>Tsuneyuki</strong>
+          </span>
+        </div>
+      </footer>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+      document.getElementById('footerYear').textContent = new Date().getFullYear();
+    </script>
+    <script src="/app.js"></script>
+  </body>
+</html>

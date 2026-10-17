@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080b16">
+  <meta name="description" content="Artex Mail - layanan email sementara yang praktis.">
+  <title>Artex Mail — Temporary Inbox</title>
+  <link rel="icon" type="image/svg+xml" href="/logo.png">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <div class="app">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Artex Mail Beranda">
+        <img src="/logo.png" alt="Artex Mail logo">
+        <span class="brand-copy">
+          <strong><span id="appTitle">Artex</span> <em>Mail</em></strong>
+          <small id="appSubtitle">TEMPORARY INBOX</small>
+        </span>
+      </a>
+      <div class="status"><span></span> Layanan aktif</div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-content">
+          <span class="eyebrow"><span class="sparkle">✦</span> EMAIL SEMENTARA · CEPAT · PRAKTIS</span>
+          <h1>Email sementara,<br><span>privasi lebih terjaga.</span></h1>
+          <p>Buat alamat email dalam hitungan detik dan periksa pesan masuk dari satu tempat.</p>
+          <div class="hero-pills">
+            <span>✦ Praktis digunakan</span>
+            <span>◈ Tanpa tampilan rumit</span>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="orb orb-a"></div>
+          <div class="orb orb-b"></div>
+          <div class="mail-icon"><span>✉</span></div>
+          <div class="floating-chip">✦ Inbox kamu</div>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <div class="section-heading">
+          <div class="section-icon">✉</div>
+          <div>
+            <h2>Inbox kamu</h2>
+            <p>Kelola alamat dan periksa pesan masuk.</p>
+          </div>
+          <span class="live-tag"><i></i> LIVE</span>
+        </div>
+
+        <div class="inbox-controls">
+          <label class="field-label" for="inboxSelect">Alamat email aktif</label>
+          <div class="select-wrap">
+            <span class="field-icon">✉</span>
+            <select id="inboxSelect" aria-label="Pilih inbox"></select>
+          </div>
+          <div class="action-row">
+            <button id="copyBtn" class="btn btn-primary">▣ <span>Salin alamat</span></button>
+            <button id="refreshBtn" class="btn btn-secondary">↻ <span>Refresh</span></button>
+            <button id="newBtn" class="btn btn-secondary">＋ <span>Email baru</span></button>
+            <button id="deleteBtn" class="btn btn-danger">⌫ <span>Hapus</span></button>
+          </div>
+        </div>
+
+        <section class="new-box hidden" id="newBox">
+          <div class="section-heading compact">
+            <div class="section-icon">＋</div>
+            <div>
+              <h2>Buat alamat email</h2>
+              <p>Pilih nama sendiri atau buat alamat acak.</p>
+            </div>
+          </div>
+          <label class="field-label" for="localPartInput">Nama alamat (opsional)</label>
+          <input id="localPartInput" class="text-input" placeholder="Contoh: namakamu" autocomplete="off">
+          <label class="field-label" for="domainSelect">Domain email</label>
+          <select id="domainSelect" class="text-input"></select>
+          <div class="action-row create-actions">
+            <button id="createCustomBtn" class="btn btn-primary">＋ Buat alamat ini</button>
+            <button id="createRandomBtn" class="btn btn-secondary">✦ Buat email acak</button>
+          </div>
+        </section>
+
+        <section class="message-panel">
+          <div class="message-panel-head">
+            <div>
+              <span class="overline">ALAMAT SAAT INI</span>
+              <h2 id="currentInbox">Belum ada inbox</h2>
+            </div>
+            <span class="count-badge" id="messageCount">0 pesan</span>
+          </div>
+          <div id="messageList" class="message-list">
+            <div class="empty-state">
+              <div class="empty-icon">✉</div>
+              <h3>Inbox siap digunakan</h3>
+              <p>Pilih alamat email atau buat alamat baru untuk mulai menerima pesan.</p>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section class="info-grid">
+        <article class="info-card">
+          <div class="info-icon purple">✦</div>
+          <h3>Praktis dan cepat</h3>
+          <p>Buat alamat sementara tanpa proses yang berbelit.</p>
+        </article>
+        <article class="info-card">
+          <div class="info-icon blue">◈</div>
+          <h3>Kelola inbox</h3>
+          <p>Pilih alamat, salin, segarkan, atau hapus melalui kontrol inbox.</p>
+        </article>
+        <article class="info-card">
+          <div class="info-icon pink">⌁</div>
+          <h3>Desain responsif</h3>
+          <p>Tampilan dirancang agar nyaman di HP maupun komputer.</p>
+        </article>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-brand"><img src="/logo.png" alt=""><strong>ARTEX MAIL</strong></div>
+      <span>Simple mail for a smarter you.</span>
+      <a href="https://github.com/hirotomasato" target="_blank" rel="noopener noreferrer">Developer · masantoid ↗</a>
+    </footer>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="/app.js"></script>
+</body>
+</html>
