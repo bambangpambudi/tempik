@@ -29,6 +29,10 @@ let currentMessages = [];
 let selectedMessageIndex = 0;
 let pendingDeleteAddress = '';
 
+// ⭐ Polling
+let pollingInterval = null;
+const POLLING_DELAY = 3000; // 3 detik (lebih responsif)
+
 /* ---------- Helpers ---------- */
 function escapeHtml(str) {
   if (str == null) return '';
@@ -163,6 +167,14 @@ function showToast(text, icon = 'fa-solid fa-circle-check') {
   setTimeout(() => { el.classList.add('fadeout'); setTimeout(() => el.remove(), 200); }, 2400);
 }
 
+function playNotification() {
+  const audio = document.getElementById('notificationSound');
+  if (audio) {
+    audio.currentTime = 0;
+    audio.play().catch(e => console.warn('[audio] Autoplay diblokir:', e));
+  }
+}
+
 async function fetchJson(url, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
   if (sessionId) headers['x-session-id'] = sessionId;
@@ -171,13 +183,10 @@ async function fetchJson(url, options = {}) {
   return res.json();
 }
 
-/* ---------- URL ROUTING (FIX %3D) ---------- */
+/* ---------- URL ROUTING ---------- */
 function getAddressFromURL() {
-  // Decode URL terlebih dahulu agar %3D berubah menjadi =
   const decodedPath = decodeURIComponent(location.pathname);
-  if (decodedPath.startsWith('/email=')) {
-    return decodedPath.slice(7).trim();
-  }
+  if (decodedPath.startsWith('/email=')) return decodedPath.slice(7).trim();
   
   const decodedSearch = decodeURIComponent(location.search);
   const params = new URLSearchParams(decodedSearch);
@@ -204,7 +213,7 @@ function updateURL(address, replace = false) {
   else history.pushState(state, '', desired);
 }
 
-/* ---------- Data Fetch ---------- */
+/* ---------- Data Fetch & Polling ---------- */
 async function fetchInboxes() {
   try {
     allInboxes = await fetchJson('/api/inboxes');
@@ -214,28 +223,84 @@ async function fetchInboxes() {
   inboxCount.textContent = allInboxes.length;
 }
 
-async function loadMessages() {
+async function loadMessages({ isBackground = false } = {}) {
   if (!currentAddress) {
     currentMessages = [];
     renderMailView();
     return;
   }
   currentInbox.textContent = currentAddress;
+  
   try {
-    currentMessages = await fetchJson('/api/inboxes/' + encodeURIComponent(currentAddress) + '/messages');
+    const fetched = await fetchJson('/api/inboxes/' + encodeURIComponent(currentAddress) + '/messages');
+    
+    // ⭐ Deteksi Email Baru
+    if (isBackground && fetched.length > currentMessages.length) {
+      console.log('[polling] 🔔 Email baru terdeteksi! (' + currentMessages.length + ' → ' + fetched.length + ')');
+      playNotification();
+    }
+    
+    currentMessages = fetched;
   } catch (e) {
-    currentMessages = [];
-    showToast('Failed to load messages', 'fa-solid fa-triangle-exclamation');
+    console.warn('[polling] Fetch error:', e.message);
+    if (!isBackground) showToast('Failed to load messages', 'fa-solid fa-triangle-exclamation');
   }
-  selectedMessageIndex = currentMessages.length > 0 ? 0 : -1;
+  
+  if (!isBackground) {
+    selectedMessageIndex = currentMessages.length > 0 ? 0 : -1;
+  } else if (selectedMessageIndex >= currentMessages.length) {
+    selectedMessageIndex = currentMessages.length > 0 ? 0 : -1;
+  }
+
   renderMailView();
 }
+
+function startPolling() {
+  if (pollingInterval) {
+    console.log('[polling] Already running, skip');
+    return;
+  }
+  console.log('[polling] ✅ Started (every ' + (POLLING_DELAY / 1000) + 's)');
+  
+  // Tampilkan indikator polling aktif
+  const dot = document.querySelector('.status-indicator');
+  if (dot) dot.style.animation = 'pulse 2s infinite';
+  
+  pollingInterval = setInterval(() => {
+    if (currentAddress) {
+      console.log('[polling] Checking... ' + new Date().toLocaleTimeString());
+      loadMessages({ isBackground: true });
+    }
+  }, POLLING_DELAY);
+}
+
+function stopPolling() {
+  if (pollingInterval) {
+    console.log('[polling] ⏸ Stopped');
+    clearInterval(pollingInterval);
+    pollingInterval = null;
+  }
+  const dot = document.querySelector('.status-indicator');
+  if (dot) dot.style.animation = 'none';
+}
+
+// ⭐ Page Visibility
+document.addEventListener('visibilitychange', () => {
+  console.log('[visibility] hidden=' + document.hidden);
+  if (document.hidden) {
+    stopPolling();
+  } else {
+    if (currentAddress) loadMessages({ isBackground: true });
+    startPolling();
+  }
+});
 
 async function selectInbox(address, { push = true } = {}) {
   currentAddress = address || '';
   renderInboxList();
   updateURL(currentAddress, !push);
-  await loadMessages();
+  await loadMessages({ isBackground: false });
+  startPolling();
 }
 
 /* ---------- Render: Inbox List ---------- */
@@ -325,7 +390,9 @@ function renderMessageList() {
       selectedMessageIndex = idx;
       renderMessageList();
       renderMessageDetail();
-      
+      if (window.innerWidth <= 1024) {
+        messageDetail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     });
   });
 }
@@ -403,7 +470,7 @@ copyBtn.addEventListener('click', async () => {
   }
 });
 
-refreshBtn.addEventListener('click', loadMessages);
+refreshBtn.addEventListener('click', () => loadMessages({ isBackground: false }));
 
 /* ---------- Create Inbox ---------- */
 async function createInbox(localPart) {
@@ -473,32 +540,6 @@ confirmDeleteBtn.addEventListener('click', async () => {
   }
 });
 
-/* ---------- Browser Back/Forward ---------- */
-window.addEventListener('popstate', async () => {
-  const urlAddr = getAddressFromURL();
-  if (urlAddr) {
-    const localPart = urlAddr.includes('@') ? urlAddr.split('@')[0] : urlAddr;
-    const domain = appConfig.mailDomain || 'artexmail.web.id';
-    const targetAddress = localPart + '@' + domain;
-    try {
-      await fetchJson('/api/inboxes', { method: 'POST', body: JSON.stringify({ localPart, domain }) });
-    } catch(e) {}
-    await fetchInboxes();
-    await selectInbox(targetAddress, { push: false });
-    return;
-  }
-  if (!allInboxes.length) {
-    currentAddress = '';
-    renderInboxList();
-    renderMailView();
-  } else {
-    currentAddress = allInboxes[0].address;
-    renderInboxList();
-    updateURL(currentAddress, true);
-    await loadMessages();
-  }
-});
-
 /* ---------- Keyboard ---------- */
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
@@ -511,11 +552,12 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-/* ---------- Boot (Clean, Tanpa Debug) ---------- */
+/* ---------- Boot ---------- */
 async function boot() {
   try {
     await loadConfig();
     await ensureSession();
+    await fetchInboxes();
 
     const urlAddr = getAddressFromURL();
 
@@ -524,7 +566,6 @@ async function boot() {
       const domain = appConfig.mailDomain || 'artexmail.web.id';
       const targetAddress = localPart + '@' + domain;
 
-      // 1. Coba hubungkan ke sesi (tambahkan try-catch agar tidak nge-hang jika sudah ada)
       try {
         await fetchJson('/api/inboxes', {
           method: 'POST',
@@ -533,27 +574,22 @@ async function boot() {
       } catch (err) {
         console.warn('Adopt skipped or failed:', err);
       }
-
-      // 2. Ambil daftar inbox
+      
       await fetchInboxes();
-
-      // 3. Tampilkan UI
-      currentAddress = targetAddress;
-      renderInboxList();
-      updateURL(currentAddress, true);
-      await loadMessages();
-      return;
+      await selectInbox(targetAddress, { push: false });
+    } else {
+      if (!allInboxes.length) {
+        currentAddress = '';
+        renderInboxList();
+        renderMailView();
+      } else {
+        await selectInbox(allInboxes[0].address, { push: false });
+      }
     }
 
-    // Jika tidak ada URL email=
-    await fetchInboxes();
-    if (!allInboxes.length) {
-      currentAddress = '';
-      renderInboxList();
-      renderMailView();
-      return;
-    }
-    await selectInbox(allInboxes[0].address, { push: false });
+    // ⭐ Paksa mulai polling (tanpa syarat document.hidden)
+    startPolling();
+    console.log('[boot] App ready, polling active');
 
   } catch (err) {
     console.error(err);
