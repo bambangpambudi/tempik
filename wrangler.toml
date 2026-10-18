@@ -1,41 +1,36 @@
 name = "tempik"
 main = "src/index.ts"
 compatibility_date = "2025-06-01"
+compatibility_flags = ["nodejs_compat"]
 
 workers_dev = false
 addresses = ["*@artexmail.web.id"]
 
-# ---- D1 Database ----
 [[d1_databases]]
 binding = "DB"
 database_name = "tempik-db"
 database_id = "93bfe1d3-1894-4e30-93a6-77a007aee9af"
 
-# ---- Email Worker ----
 [email]
 action = "process"
 
-# ---- Custom domain routes ----
 [[routes]]
 pattern = "artexmail.web.id"
 custom_domain = true
 
-# ---- Environment variables ----
 [vars]
 APP_NAME = "Artex Mail"
 MAIL_DOMAIN = "artexmail.web.id"
 WEB_HOST = "artexmail.web.id"
+TURNSTILE_SITE_KEY = "0x4AAAAAAFZvrP_M9OUFp3iU"
 
-# ---- Static assets (web frontend) ----
 [assets]
 directory = "./src/web"
 binding = "ASSETS"
 not_found_handling = "single-page-application"
 
-# ---- Observability ----
 [observability]
 enabled = true
 
-# ⭐ Auto-Delete: Berjalan otomatis setiap 1 jam
 [triggers]
-crons = ["0 * * * *"]
+crons = ["* * * * *"]

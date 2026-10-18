@@ -2,15 +2,17 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#0B0F19" />
+    <link rel="manifest" href="/manifest.json" />
     <title>Artex Mail</title>
     <link rel="icon" type="image/png" href="/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
-    <link rel="stylesheet" href="/styles.css?v=35" />
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <link rel="stylesheet" href="/styles.css?v=777" />
   </head>
   <body>
     <div class="orb orb-cyan"></div>
@@ -26,9 +28,13 @@
       <div class="current-inbox-info">
         <div class="status-indicator"></div>
         <h2 id="currentInbox">No inbox selected</h2>
+        <span id="inboxTimer" class="inbox-timer hidden">⏳ 00:00</span>
       </div>
 
       <div class="topbar-actions">
+        <button id="pushBtn" class="icon-btn" title="Enable Notifications" type="button" style="display:none;">
+          <i class="fa-regular fa-bell"></i>
+        </button>
         <button id="copyBtn" class="icon-btn" title="Copy address" type="button">
           <i class="fa-regular fa-copy"></i>
         </button>
@@ -68,7 +74,34 @@
           <input id="localPartInput" type="text" placeholder="username or empty for random" autocomplete="off" spellcheck="false" />
         </div>
         <select id="domainSelect"></select>
-        <div class="btn-row">
+        <div style="margin-top:4px; position: relative;">
+          <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Expires in:</label>
+          
+          <!-- Custom Dropdown Trigger -->
+          <div class="custom-select-trigger" id="ttlTrigger">
+            <span id="ttlSelectedLabel">30 Minutes</span>
+            <i class="fa-solid fa-chevron-down" style="font-size:10px; color:var(--primary); transition:transform 0.2s;"></i>
+          </div>
+          
+          <!-- Custom Dropdown Menu -->
+          <div class="custom-select-options hidden" id="ttlOptions">
+            <div class="custom-select-option" data-val="10">10 Minutes</div>
+            <div class="custom-select-option active" data-val="30">30 Minutes</div>
+            <div class="custom-select-option" data-val="60">1 Hour</div>
+            <div class="custom-select-option" data-val="1440">24 Hours</div>
+            <div class="custom-select-option" data-val="10080">7 Days</div>
+          </div>
+          
+          <!-- Hidden Select (untuk JS membaca value) -->
+          <select id="ttlSelect" style="display:none;">
+            <option value="10">10 Minutes</option>
+            <option value="30" selected>30 Minutes</option>
+            <option value="60">1 Hour</option>
+            <option value="1440">24 Hours</option>
+            <option value="10080">7 Days</option>
+          </select>
+        </div>
+        <div class="btn-row" style="margin-top:10px;">
           <button id="createRandomBtn" class="btn-ghost" type="button">
             <i class="fa-solid fa-dice"></i> Random
           </button>
@@ -101,9 +134,7 @@
     <div class="modal-overlay hidden" id="deleteModal">
       <div class="modal" style="max-width: 380px; text-align: center;">
         <div class="modal-body" style="padding: 32px 24px 20px;">
-          <div class="danger-icon-wrap">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-          </div>
+          <div class="danger-icon-wrap"><i class="fa-solid fa-triangle-exclamation"></i></div>
           <h3 style="font-family: var(--font-display); font-size: 20px; margin-bottom: 8px;">Delete Inbox?</h3>
           <p style="color: var(--text-sec); font-size: 14px; line-height: 1.5; margin-bottom: 24px;">
             Are you sure you want to delete <strong id="deleteTargetAddress" style="color: var(--text-main); word-break: break-all;"></strong>? This action cannot be undone.
@@ -116,11 +147,35 @@
       </div>
     </div>
 
+    <div class="modal-overlay hidden" id="rateLimitModal" style="z-index: 100000;">
+      <div class="modal" style="max-width: 420px; text-align: center; border: 1px solid rgba(244, 63, 94, 0.4); box-shadow: 0 0 60px rgba(244, 63, 94, 0.25);">
+        <div class="modal-body" style="padding: 40px 30px 30px;">
+          <div class="danger-icon-wrap" style="width: 84px; height: 84px; font-size: 36px; margin-bottom: 24px; background: rgba(244, 63, 94, 0.15); border-color: rgba(244, 63, 94, 0.5);">
+            <i class="fa-solid fa-hourglass-half"></i>
+          </div>
+          <h3 style="font-family: var(--font-display); font-size: 24px; margin-bottom: 12px; color: #fff;">Whoa, Slow Down!</h3>
+          <p style="color: var(--text-sec); font-size: 15px; line-height: 1.6; margin-bottom: 28px;">
+            You have reached the maximum limit for creating new inboxes (5 per 30 minutes).<br><br>Please take a break and try again later.
+          </p>
+          <button id="closeRateLimitBtn" class="btn-primary" style="width: 100%; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 700; border: none; cursor: pointer;">
+            Understood
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="captcha-gate hidden" id="captchaGate">
+      <div class="captcha-box">
+        <img src="/logo.png" alt="Logo" style="width:64px;height:64px;margin-bottom:16px;border-radius:12px;" />
+        <h2 style="font-family:var(--font-display);font-size:24px;margin-bottom:8px;">Welcome to Artex Mail</h2>
+        <p style="color:var(--text-muted);margin-bottom:24px;font-size:14px;">Please verify you are human to continue.</p>
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAAFZvrP_M9OUFp3iU" data-callback="onTurnstileSuccess"></div>
+      </div>
+    </div>
+
     <div class="toast-container" id="toastContainer"></div>
-    
-    <!-- ⭐ Audio Notifikasi -->
     <audio id="notificationSound" src="/notification.mp3" preload="auto"></audio>
-    
-    <script src="/app.js?v=35"></script>
+
+    <script src="/app.js?v=777"></script>
   </body>
 </html>
